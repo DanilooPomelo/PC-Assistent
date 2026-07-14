@@ -11,26 +11,16 @@ from storage import load_notes, load_tasks, save_tasks, save_notes
 tasks = load_tasks()
 notes = load_notes()
 
+def get_next_id(items):
+     max_id_value = 0
+     for item in items:
+        if item['id'] > max_id_value:
+            max_id_value = item['id']
+     return max_id_value + 1
+     
+next_id_task = get_next_id(tasks)
+next_id_note = get_next_id(notes)
 
-def max_id_note():
-    global next_id_note
-    max_id_value = 0
-    for note in notes:
-        if note['id'] > max_id_value:
-            max_id_value = note['id']
-    next_id_note = max_id_value + 1
-next_id_note = 1
-max_id_note()
-
-def max_id_task():
-    global next_id_task
-    max_id_value = 0
-    for task in tasks:
-        if task['id'] > max_id_value:
-            max_id_value = task['id']
-    next_id_task = max_id_value + 1
-next_id_task = 1
-max_id_task()
 
 def complete_task():
     task_id = get_int("Введите ID заметки которую хотите пометить выполненой: ")
