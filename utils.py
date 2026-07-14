@@ -8,3 +8,8 @@ def get_int(numb):
             return int(input(numb))
         except ValueError:
             return "Введите число!"
+
+
+def waitfornext():
+    get_txt("Enter for next")
+    return
