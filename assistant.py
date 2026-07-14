@@ -69,9 +69,9 @@ def set_priority(item):
     while True:
         print("""
               Выберите приоритет выполнения задачи
-          1 - низкий🟢
-          2 - средний🟡
-          3 - высокий🔴
+          1 - низкий\U0001F7E2
+          2 - средний\U0001F7E1
+          3 - высокий\U0001F534
               """)
         choice = get_int("введите значение: ")
         if choice == 1:
@@ -89,14 +89,14 @@ def set_priority(item):
 def priority_visual(item):
     
         if item['priority'] == "low":
-            return("🟢")
+            return("\U0001F7E2")
 
         elif item['priority'] == "medium":
-            return("🟡")
+            return("\U0001F7E1")
         elif item['priority'] == "high":
-            return("🔴")
+            return("\U0001F534")
         else:
-            return ("⚪")
+            return ("\u26AA")
 
 def create_note():
     global next_id_note
