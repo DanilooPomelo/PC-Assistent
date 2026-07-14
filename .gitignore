@@ -1,0 +1,13 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# JSON с пользовательскими данными
+*.json
+
+# VS Code
+.vscode/
+
+# Виртуальное окружение (на будущее)
+venv/
+.venv/
