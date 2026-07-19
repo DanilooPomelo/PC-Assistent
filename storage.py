@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from models import Task
+from models import Task , Note
 
 
 TASKS_FILE = Path(__file__).with_name("tasks.json")
@@ -26,7 +26,13 @@ def load_tasks():
 def load_notes():
     try:
         with NOTES_FILE.open("r", encoding="utf-8") as f:
-            return json.load(f)
+            notes = json.load(f)
+
+        result1 = []
+        for note in notes:
+            result1.append(Note.from_dict(note))
+        return result1
+    
     except FileNotFoundError:
         return []
 
@@ -42,5 +48,9 @@ def save_tasks(tasks):
 
 
 def save_notes(notes):
+    notes_data = []
+    for note in notes:
+        notes_data.append(note.to_dict())
+
     with NOTES_FILE.open("w", encoding="utf-8") as f:
-        json.dump(notes, f, ensure_ascii=False, indent=2)
+        json.dump(notes_data, f, ensure_ascii=False, indent=2)

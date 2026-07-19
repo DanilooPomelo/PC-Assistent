@@ -1,8 +1,5 @@
-
-
 from models import Task, Note
 from menus import main_menu, menu_p1, menu_p2, menu_p3
-
 from utils import get_int, get_txt, waitfornext
 from storage import load_notes, load_tasks, save_tasks, save_notes
 
@@ -21,35 +18,16 @@ def get_next_id(items):
             max_id_value = item.id
      return max_id_value + 1
      
-next_id_task = get_next_id(tasks)
-next_id_note = get_next_id(notes)
 
 
-def complete_task():
-    task_id = get_int(
-        "Введите ID задачи, которую хотите пометить выполненной: "
-    )
-
-    for task in tasks:
-        if task_id == task["id"]:
-            task["status"] = "Выполнено"
-            save_tasks(tasks)
-
-            print(
-                f"Статус задачи «{task['title']}» "
-                f"успешно изменён на: {task['status']}"
-            )
-            return
-
-    print("Задача с таким ID не найдена!")
 
 def searcher(items, section_name):
     words = get_txt("Название для поиска: ").lower()
     found_items = []
 
     for item in items:
-        title = item["title"].lower()
-        text = item["text"].lower()
+        title = item.title.lower()
+        text = item.text.lower()
 
         if words in title or words in text:
             found_items.append(item)
@@ -62,13 +40,13 @@ def searcher(items, section_name):
 
     for item in found_items:
         print(
-            f"ID: {item['id']} | "
-            f"Название: {item['title']} | "
+            f"ID: {item.id} | "
+            f"Название: {item.title} | "
             f"Приоритет: {priority_visual(item)}"
         )
 
-        if "status" in item:
-            print(f"Статус: {item['status']}")
+        if hasattr(item,"status"):
+            print(f"Статус: {item.status}")
 
 def set_priority(item):
     while True:
@@ -98,34 +76,7 @@ def priority_visual(item):
         "high": "\U0001F534",
     }
 
-    return priority_icons.get(item['priority'], "\u26AA")
-
-def create_note():
-    global next_id_note
-    new_note = {
-    "id": next_id_note,
-    "title": "",
-    "text": "",
-    "priority": ""
-    }
-    print("Заметка для создания")
-    new_note['title'] = get_txt("Название: ")
-    print("текст для заметки!")
-    new_note['text'] = get_txt("текст заметки: ")
-    set_priority(new_note)
-    print(f"""
-                  Заметка:   {new_note['title']} 
-                  С текстом: {new_note['text']}
-                  Приоритет: {priority_visual(new_note)}
-                  была успешно добавлена!
-""")
-    next_id_note += 1
-    notes.append(new_note)
-    
-    save_notes(notes)
-    waitfornext()
-    return
-
+    return priority_icons.get(item.priority, "\u26AA")
 
 def show_all(items, section_name):
     if not items:
@@ -136,13 +87,13 @@ def show_all(items, section_name):
 
     for item in items:
         line = (
-            f"ID: {item['id']} | "
-            f"Название: {item['title']} | "
+            f"ID: {item.id} | "
+            f"Название: {item.title} | "
             f"Приоритет: {priority_visual(item)}"
         )
 
-        if items.status in item:
-            line += f" | Статус: {item['status']}"
+        if hasattr(item, "status"):
+            line += f" | Статус: {item.status}"
 
         print(line)
 
@@ -159,28 +110,6 @@ def deleter(items, save_function):
     
     print("по данному ID ничего не найдено!")
             
-def logic_p1():
-    while True:
-        menu_p1()
-        choice = get_int("Выберите пункт: ")
-        if choice == 1:
-            create_note()
-        elif choice == 2:
-            searcher(notes, "Заметки")
-            waitfornext()
-        elif choice == 3:
-            show_all(notes, "Заметок")
-            waitfornext()
-        elif choice == 4:
-            deleter(notes, save_notes)
-            waitfornext()
-        elif choice == 5:
-            return
-        else:
-            print("Неверный выбор!")
-
-
-
 def settings():
     while True:
         menu_p3()
@@ -193,12 +122,12 @@ def settings():
 
 class TaskManager:
     def __init__(self) -> None:
-        self.tasks = []
+        self.tasks = tasks
         self.taskclass = Task
     
     
     def create(self):
-        id = next_id_task
+        new_id = get_next_id(self.tasks)
         print("Задача для создания")
         title = get_txt("Название: ")
         print("Описание для задачи!")
@@ -208,10 +137,10 @@ class TaskManager:
         priority = "low"
         everyday = False
         deadline = None
-        new_task = self.taskclass(id,title, text, status, created_at, priority, everyday, deadline)
+        new_task = self.taskclass(new_id,title, text, status, created_at, priority, everyday, deadline)
         priority = set_priority(new_task)
         self.tasks.append(new_task)
-        #next_id_task += 1
+        
         print(f"""
                   Задача: {new_task.title} 
                   С текстом: {new_task.text}
@@ -248,15 +177,65 @@ class TaskManager:
             if choice == 1:
                 self.create()
             elif choice == 2:
+                searcher(self.tasks, "Задача")
+            elif choice == 3:
                 show_all(self.tasks, "Задачи")
                 waitfornext()
-            elif choice == 3:
+            elif choice == 4:
                 self.complete_task()
                 waitfornext()
+            elif choice == 5:
+                deleter(self.tasks, save_tasks)
+                waitfornext()
+            elif choice == 6:
+                return
+            else:
+                print("неверный ввод!")
+
+
+class NoteManager:
+    def __init__(self) -> None:
+        self.notes = notes
+        self.noteclass = Note
+    
+    def create(self):
+        new_id =get_next_id(notes)
+        print("Название заметки!")
+        title = get_txt("Название: ")
+        print("Текст Заметки!")
+        text = get_txt("Введите: ")
+        priority = "low"
+        new_note = self.noteclass(new_id, title,text,priority)
+        priority = set_priority(new_note)
+        self.notes.append(new_note)
+        print(f"""
+                  Задача: {new_note.title} 
+                  С текстом: {new_note.text}
+                  Приоритет: {priority_visual(new_note)}
+                  была успешно добавлена!
+                  """)
+        save_notes(self.notes)
+        waitfornext()
+        return
+
+
+
+    def logic_p1(self):
+        while True:
+            menu_p1()
+            choice = get_int("Выберите пункт: ")
+            if choice == 1:
+                self.create()
+            elif choice == 2:
+                searcher(self.notes, "Заметки")
+                waitfornext()
+            elif choice == 3:
+                show_all(self.notes, "Заметок")
+                waitfornext()
             elif choice == 4:
-                deleter(tasks, save_tasks(self.tasks))
+                deleter(self.notes, save_notes)
                 waitfornext()
             elif choice == 5:
                 return
             else:
-                print("неверный ввод!")
+                print("Неверный выбор!")

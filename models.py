@@ -39,5 +39,21 @@ class Note:
         self.title = title
         self.text = text
         self.priority = priority
+
+    def to_dict(self):
+        return {
+        "id": self.id,
+        "title": self.title,
+        "text": self.text,
+        "priority": self.priority,
+    }
+    @classmethod
+    def from_dict(cls,task):
+        return cls(
+            task["id"],
+            task["title"],
+            task["text"],
+            task["priority"]
+    )
         
     
