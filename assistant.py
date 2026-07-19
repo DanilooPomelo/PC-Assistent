@@ -1,7 +1,6 @@
-from encodings.punycode import T
-from random import choice
-import re
 
+
+from models import Task, Note
 from menus import main_menu, menu_p1, menu_p2, menu_p3
 
 from utils import get_int, get_txt, waitfornext
@@ -11,11 +10,15 @@ from storage import load_notes, load_tasks, save_tasks, save_notes
 tasks = load_tasks()
 notes = load_notes()
 
+
+
+
+
 def get_next_id(items):
      max_id_value = 0
      for item in items:
-        if item['id'] > max_id_value:
-            max_id_value = item['id']
+        if item.id > max_id_value:
+            max_id_value = item.id
      return max_id_value + 1
      
 next_id_task = get_next_id(tasks)
@@ -23,37 +26,49 @@ next_id_note = get_next_id(notes)
 
 
 def complete_task():
-    task_id = get_int("Введите ID заметки которую хотите пометить выполненой: ")
-    found = False
+    task_id = get_int(
+        "Введите ID задачи, которую хотите пометить выполненной: "
+    )
+
     for task in tasks:
-            if task_id == task['id']:
-                task['status'] = "Выполнено"
-                found = True
-                print(f"статус задачи: {task['title']} успешно изменен на: {task['status']}")
-                save_tasks(tasks)
-                break
-    if not found:
-            print("заметка с таким ID не найдена!")
+        if task_id == task["id"]:
+            task["status"] = "Выполнено"
+            save_tasks(tasks)
+
+            print(
+                f"Статус задачи «{task['title']}» "
+                f"успешно изменён на: {task['status']}"
+            )
+            return
+
+    print("Задача с таким ID не найдена!")
 
 def searcher(items, section_name):
     words = get_txt("Название для поиска: ").lower()
-    searcher = []
+    found_items = []
+
     for item in items:
-        title = item['title'].lower()
-        text = item['text'].lower()
+        title = item["title"].lower()
+        text = item["text"].lower()
+
         if words in title or words in text:
-            searcher.append(item)
-    if not searcher:
-        print(f"{section_name} не найдена попробуйте снова!")
+            found_items.append(item)
+
+    if not found_items:
+        print(f"{section_name} не найдены. Попробуйте снова!")
         return
-    else:
-        for item in searcher:
-            print(f"""
-                  ---{section_name} которые удалось найти---
-                  ID: {item['id']}
-                  Name: {item['title']}
-                  Priority: {item['priority']}
-""")
+
+    print(f"--- Результаты поиска: {section_name} ---")
+
+    for item in found_items:
+        print(
+            f"ID: {item['id']} | "
+            f"Название: {item['title']} | "
+            f"Приоритет: {priority_visual(item)}"
+        )
+
+        if "status" in item:
+            print(f"Статус: {item['status']}")
 
 def set_priority(item):
     while True:
@@ -65,28 +80,25 @@ def set_priority(item):
               """)
         choice = get_int("введите значение: ")
         if choice == 1:
-            item['priority'] = "low"
+            item.priority = "low"
             return
         elif choice == 2:
-            item['priority'] = "medium"
+            item.priority = "medium"
             return
         elif choice == 3:
-            item['priority'] = "high"
+            item.priority = "high"
             return
         else:
             print ("не верный выбор!")
 
 def priority_visual(item):
-    
-        if item['priority'] == "low":
-            return("\U0001F7E2")
+    priority_icons = {
+        "low": "\U0001F7E2",
+        "medium": "\U0001F7E1",
+        "high": "\U0001F534",
+    }
 
-        elif item['priority'] == "medium":
-            return("\U0001F7E1")
-        elif item['priority'] == "high":
-            return("\U0001F534")
-        else:
-            return ("\u26AA")
+    return priority_icons.get(item['priority'], "\u26AA")
 
 def create_note():
     global next_id_note
@@ -114,54 +126,32 @@ def create_note():
     waitfornext()
     return
 
-def create_task():
-    global next_id_task
-    new_task = {
-            "id": next_id_task,
-            "title": "",
-            "text": "",
-            "status": "в процессе",
-            "created_at": "",
-            "priority" : "",
-            "everyday" : False,
-            "deadline" : ""
-    }
-    print("Задача для создания")
-    new_task['title'] = get_txt("Название: ")
-    print("текст для заметки!")
-    new_task['text'] = get_txt("текст задачс: ")
-    set_priority(new_task)
-    print(f"""
-                  Задача: {new_task['title']} 
-                  С текстом: {new_task['text']}
-                  Приоритет: {priority_visual(new_task)}
-                  была успешно добавлена!
-""")
-    tasks.append(new_task)
-    next_id_task += 1
-    save_tasks(tasks)
-    waitfornext()
-    return
 
 def show_all(items, section_name):
     if not items:
-        print(f"список {section_name} пуст!")
+        print(f"Список {section_name} пуст!")
         return
-    print(f"Список ваших {section_name}")
+
+    print(f"Список ваших {section_name}:")
+
     for item in items:
-        print(
-             
+        line = (
             f"ID: {item['id']} | "
             f"Название: {item['title']} | "
             f"Приоритет: {priority_visual(item)}"
         )
 
+        if items.status in item:
+            line += f" | Статус: {item['status']}"
+
+        print(line)
+
 def deleter(items, save_function):
     item_id = get_int("Введите Id для удаления: ")
     
     for item in items:
-        if item_id == item['id']:
-            print(f"{item['title']} была успешно удалена!")
+        if item_id == item.id:
+            print(f"{item.title} была успешно удалена!")
             items.remove(item)
             
             save_function(items)
@@ -189,22 +179,7 @@ def logic_p1():
         else:
             print("Неверный выбор!")
 
-def logic_p2():
-    while True:
-        menu_p2()
-        choice = get_int("Выберите пункт: ")
-        if choice == 1:
-            create_task()
-        elif choice == 2:
-            show_all(tasks, "Задачи")
-        elif choice == 3:
-            complete_task()
-        elif choice == 4:
-            deleter(tasks, save_tasks)
-        elif choice == 5:
-            return
-        else:
-            print("неверный ввод!")
+
 
 def settings():
     while True:
@@ -215,3 +190,73 @@ def settings():
             return
         elif choice == 0:
             return
+
+class TaskManager:
+    def __init__(self) -> None:
+        self.tasks = []
+        self.taskclass = Task
+    
+    
+    def create(self):
+        id = next_id_task
+        print("Задача для создания")
+        title = get_txt("Название: ")
+        print("Описание для задачи!")
+        text = get_txt("текст задачи: ")
+        status = "в процессе"
+        created_at = None
+        priority = "low"
+        everyday = False
+        deadline = None
+        new_task = self.taskclass(id,title, text, status, created_at, priority, everyday, deadline)
+        priority = set_priority(new_task)
+        self.tasks.append(new_task)
+        #next_id_task += 1
+        print(f"""
+                  Задача: {new_task.title} 
+                  С текстом: {new_task.text}
+                  Приоритет: {priority_visual(new_task)}
+                  была успешно добавлена!
+                  """)
+        save_tasks(self.tasks)
+        waitfornext()
+        return
+    
+    def complete_task(self):
+        task_id = get_int(
+        "Введите ID задачи, которую хотите пометить выполненной: "
+    )
+
+        for task in self.tasks:
+            if task_id == task.id:
+                task.status = "Выполнено"
+                save_tasks(self.tasks)
+
+            print(
+                    f"Статус задачи «{task.title}» "
+                    f"успешно изменён на: {task.status}"
+                )
+            return
+
+        print("Задача с таким ID не найдена!")
+
+
+    def logic_p2(self):
+        while True:
+            menu_p2()
+            choice = get_int("Выберите пункт: ")
+            if choice == 1:
+                self.create()
+            elif choice == 2:
+                show_all(self.tasks, "Задачи")
+                waitfornext()
+            elif choice == 3:
+                self.complete_task()
+                waitfornext()
+            elif choice == 4:
+                deleter(tasks, save_tasks(self.tasks))
+                waitfornext()
+            elif choice == 5:
+                return
+            else:
+                print("неверный ввод!")

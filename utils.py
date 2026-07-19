@@ -7,7 +7,7 @@ def get_int(numb):
         try:
             return int(input(numb))
         except ValueError:
-            return "Введите число!"
+            print("Введите число!")
 
 
 def waitfornext():
