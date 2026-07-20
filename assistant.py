@@ -1,11 +1,8 @@
 from models import Task, Note
-from menus import main_menu, menu_p1, menu_p2, menu_p3
+from menus import main_menu, menu_p1, menu_p2, menu_p3, menu_show_all
 from utils import get_int, get_txt, waitfornext
-from storage import  save_tasks, save_notes
 
 
-#tasks = load_tasks()
-#notes = load_notes()
 
 def get_next_id(items):
      max_id_value = 0
@@ -152,7 +149,7 @@ class TaskManager:
         for task in self.tasks:
             if task_id == task.id:
                 task.status = "Выполнено"
-                save_tasks(self.tasks)
+                self.save_function
 
                 print(
                     f"Статус задачи «{task.title}» "
@@ -161,6 +158,31 @@ class TaskManager:
                 return
 
         print("Задача с таким ID не найдена!")
+
+    def logic_showall(self):
+        choice = get_int("Ввод: ")
+        if choice == 1:
+            show_all(self.tasks, "Задачи")
+        elif choice == 2:
+            self.show_by_status("в процессе")
+        elif choice == 3:
+            self.show_by_status("Выполнено")
+
+    def show_by_status(self, section_status):
+        found = False
+        for task in self.tasks:
+            if task.status == section_status:
+                found = True
+                print(
+            f"ID: {task.id} | "
+            f"Название: {task.title} | "
+            f"Статус: {task.status}"
+            f"Приоритет: {priority_visual(task)}"
+        )
+        if not found:
+            print("Нет таких задач")
+        
+               
 
 
     def logic_p2(self):
@@ -173,13 +195,14 @@ class TaskManager:
                 searcher(self.tasks, "Задача")
                 waitfornext()
             elif choice == 3:
-                show_all(self.tasks, "Задачи")
+                menu_show_all()
+                self.logic_showall()
                 waitfornext()
             elif choice == 4:
                 self.complete_task()
                 waitfornext()
             elif choice == 5:
-                deleter(self.tasks, save_tasks)
+                deleter(self.tasks, self.save_function)
                 waitfornext()
             elif choice == 6:
                 return
@@ -228,7 +251,7 @@ class NoteManager:
                 show_all(self.notes, "Заметок")
                 waitfornext()
             elif choice == 4:
-                deleter(self.notes, save_notes)
+                deleter(self.notes, self.save_function)
                 waitfornext()
             elif choice == 5:
                 return
