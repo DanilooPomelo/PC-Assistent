@@ -1,10 +1,10 @@
 from menus import main_menu
-from assistant import NoteManager, TaskManager, notes, settings, tasks
-from storage import save_notes, save_tasks
+from assistant import NoteManager, TaskManager,  settings
+from storage import save_notes, save_tasks ,load_notes, load_tasks
 from utils import get_int
 
-note = NoteManager()
-task = TaskManager()
+note = NoteManager(load_notes(), save_notes)
+task = TaskManager(load_tasks(), save_tasks)
 while True:
     main_menu()
     choice = get_int("Выберите пункт: ")
@@ -15,7 +15,7 @@ while True:
     elif choice == 3:
         settings()
     elif choice == 4:
-        save_notes(notes)
-        save_tasks(tasks)
+        save_notes(note.notes)
+        save_tasks(task.tasks)
         print("Все успешно сохранено, выход!")
         break

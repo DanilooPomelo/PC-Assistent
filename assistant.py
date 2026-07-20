@@ -1,15 +1,11 @@
 from models import Task, Note
 from menus import main_menu, menu_p1, menu_p2, menu_p3
 from utils import get_int, get_txt, waitfornext
-from storage import load_notes, load_tasks, save_tasks, save_notes
+from storage import  save_tasks, save_notes
 
 
-tasks = load_tasks()
-notes = load_notes()
-
-
-
-
+#tasks = load_tasks()
+#notes = load_notes()
 
 def get_next_id(items):
      max_id_value = 0
@@ -18,9 +14,6 @@ def get_next_id(items):
             max_id_value = item.id
      return max_id_value + 1
      
-
-
-
 def searcher(items, section_name):
     words = get_txt("Название для поиска: ").lower()
     found_items = []
@@ -121,8 +114,9 @@ def settings():
             return
 
 class TaskManager:
-    def __init__(self) -> None:
+    def __init__(self, tasks , save_function) -> None:
         self.tasks = tasks
+        self.save_function = save_function
         self.taskclass = Task
     
     
@@ -138,7 +132,7 @@ class TaskManager:
         everyday = False
         deadline = None
         new_task = self.taskclass(new_id,title, text, status, created_at, priority, everyday, deadline)
-        priority = set_priority(new_task)
+        set_priority(new_task)
         self.tasks.append(new_task)
         
         print(f"""
@@ -147,7 +141,7 @@ class TaskManager:
                   Приоритет: {priority_visual(new_task)}
                   была успешно добавлена!
                   """)
-        save_tasks(self.tasks)
+        self.save_function(self.tasks)
         waitfornext()
         return
     
@@ -155,17 +149,16 @@ class TaskManager:
         task_id = get_int(
         "Введите ID задачи, которую хотите пометить выполненной: "
     )
-
         for task in self.tasks:
             if task_id == task.id:
                 task.status = "Выполнено"
                 save_tasks(self.tasks)
 
-            print(
+                print(
                     f"Статус задачи «{task.title}» "
                     f"успешно изменён на: {task.status}"
                 )
-            return
+                return
 
         print("Задача с таким ID не найдена!")
 
@@ -178,6 +171,7 @@ class TaskManager:
                 self.create()
             elif choice == 2:
                 searcher(self.tasks, "Задача")
+                waitfornext()
             elif choice == 3:
                 show_all(self.tasks, "Задачи")
                 waitfornext()
@@ -194,27 +188,28 @@ class TaskManager:
 
 
 class NoteManager:
-    def __init__(self) -> None:
+    def __init__(self,notes, save_function) -> None:
         self.notes = notes
+        self.save_function = save_function
         self.noteclass = Note
     
     def create(self):
-        new_id =get_next_id(notes)
+        new_id =get_next_id(self.notes)
         print("Название заметки!")
         title = get_txt("Название: ")
         print("Текст Заметки!")
         text = get_txt("Введите: ")
         priority = "low"
         new_note = self.noteclass(new_id, title,text,priority)
-        priority = set_priority(new_note)
+        set_priority(new_note)
         self.notes.append(new_note)
         print(f"""
-                  Задача: {new_note.title} 
+                  Заметка: {new_note.title} 
                   С текстом: {new_note.text}
                   Приоритет: {priority_visual(new_note)}
                   была успешно добавлена!
                   """)
-        save_notes(self.notes)
+        self.save_function(self.notes)
         waitfornext()
         return
 
