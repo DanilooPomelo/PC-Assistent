@@ -1,6 +1,8 @@
 from models import Task, Note
-from menus import main_menu, menu_p1, menu_p2, menu_p3, menu_show_all
+from menus import main_menu, menu_dead_line, menu_p1, menu_p2, menu_p3, menu_show_all
 from utils import get_int, get_txt, waitfornext
+from datetime import datetime
+
 
 
 
@@ -124,7 +126,7 @@ class TaskManager:
         print("Описание для задачи!")
         text = get_txt("текст задачи: ")
         status = "в процессе"
-        created_at = None
+        created_at = datetime.now().strftime("%Y-%m-%d %H:%M")
         priority = "low"
         everyday = False
         deadline = None
@@ -182,7 +184,44 @@ class TaskManager:
         if not found:
             print("Нет таких задач")
         
-               
+    def remeber_deadline(self):
+        today = datetime.now().strftime("%Y-%m-%d")
+        for task in self.tasks:
+            if task.deadline is None:
+                continue
+            if task.status == "Выполнено":
+                continue
+            if task.deadline < today:
+                print(f"у вас просроченая задача! {task.title}")
+
+    def add_deadline(self):
+        print("Введите ID задачи которой желаете добавить DEAD-LINE!")
+        dead_id = get_int("Ввод: ")
+        found = False
+        for task in self.tasks:
+            if task.id == dead_id:
+                found = True
+                print("Введите дату дедлайна в формате yyyy-mm-dd")
+                new_deadline = get_txt("Ввод: ")
+                task.deadline = new_deadline
+                self.save_function(self.tasks)
+                print(f"Dead-line успешно установлен на {task.deadline}")
+                break
+        if not found:
+            print("Такой задачи не существует!")
+    def dead_line_logic(self):
+        menu_dead_line()
+        choice = get_int("Ввод: ")
+        if choice == 1:
+            self.add_deadline()
+            waitfornext()
+        elif choice == 2:
+            self.remeber_deadline()
+            waitfornext()
+        elif choice == 3:
+            return
+            
+                      
 
 
     def logic_p2(self):
@@ -205,6 +244,8 @@ class TaskManager:
                 deleter(self.tasks, self.save_function)
                 waitfornext()
             elif choice == 6:
+                self.dead_line_logic()
+            elif choice == 7:
                 return
             else:
                 print("неверный ввод!")

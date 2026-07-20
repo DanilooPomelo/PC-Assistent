@@ -3,6 +3,9 @@ from assistant import NoteManager, TaskManager,  settings
 from storage import save_notes, save_tasks ,load_notes, load_tasks
 from utils import get_int
 
+
+
+
 note = NoteManager(load_notes(), save_notes)
 task = TaskManager(load_tasks(), save_tasks)
 while True:
