@@ -1,46 +1,35 @@
 from models import Task, Note
-from menus import main_menu, menu_dead_line, menu_p1, menu_p2, menu_p3, menu_show_all
+from menus import  menu_dead_line, menu_p1, menu_p2, menu_p3, menu_show_all
 from utils import get_int, get_txt, waitfornext
 from datetime import datetime
+from storage import db
 
 
 
 
-def get_next_id(items):
-     max_id_value = 0
-     for item in items:
-        if item.id > max_id_value:
-            max_id_value = item.id
-     return max_id_value + 1
-     
-def searcher(items, section_name):
+
+def searcher(table, section_name):
+    cursor = db.cursor()
+    sql = f"SELECT * FROM {table}"
     words = get_txt("Название для поиска: ").lower()
-    found_items = []
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    
+    found = False
+    for row in rows:
+        
+        if words in row['title'].lower() or words in row['text'].lower():
+            found = True
+            print(f"Нашел {section_name}"
+                  f"С ID: {row['id']}"
+                  f"Название: {row['title']}"
+                  f"Приоритет: {priority_visual(row)}")
+    if not found:
+        print("По вашему запросу ничего не найдено!")
+        
+       
 
-    for item in items:
-        title = item.title.lower()
-        text = item.text.lower()
-
-        if words in title or words in text:
-            found_items.append(item)
-
-    if not found_items:
-        print(f"{section_name} не найдены. Попробуйте снова!")
-        return
-
-    print(f"--- Результаты поиска: {section_name} ---")
-
-    for item in found_items:
-        print(
-            f"ID: {item.id} | "
-            f"Название: {item.title} | "
-            f"Приоритет: {priority_visual(item)}"
-        )
-
-        if hasattr(item,"status"):
-            print(f"Статус: {item.status}")
-
-def set_priority(item):
+def set_priority():
     while True:
         print("""
               Выберите приоритет выполнения задачи
@@ -50,14 +39,14 @@ def set_priority(item):
               """)
         choice = get_int("введите значение: ")
         if choice == 1:
-            item.priority = "low"
-            return
+            priority = "low"
+            return priority
         elif choice == 2:
-            item.priority = "medium"
-            return
+            priority = "medium"
+            return priority
         elif choice == 3:
-            item.priority = "high"
-            return
+            priority = "high"
+            return priority
         else:
             print ("не верный выбор!")
 
@@ -68,39 +57,37 @@ def priority_visual(item):
         "high": "\U0001F534",
     }
 
-    return priority_icons.get(item.priority, "\u26AA")
+    return priority_icons.get(item['priority'], "\u26AA")
 
-def show_all(items, section_name):
-    if not items:
+
+def show_all(table, section_name):
+    cursor = db.cursor()
+    sql = f"SELECT * FROM {table}"
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    if not rows:
         print(f"Список {section_name} пуст!")
-        return
+    for row in rows:
+        print(f"ID: {row['id']} | "
+            f"Название: {row['title']} | "
+            f"Приоритет: {priority_visual(row)}")
+        if "status" in row.keys():
+            print(f"Статус: {row['status']}")
 
-    print(f"Список ваших {section_name}:")
-
-    for item in items:
-        line = (
-            f"ID: {item.id} | "
-            f"Название: {item.title} | "
-            f"Приоритет: {priority_visual(item)}"
-        )
-
-        if hasattr(item, "status"):
-            line += f" | Статус: {item.status}"
-
-        print(line)
-
-def deleter(items, save_function):
+def deleter(table, section_name):
+    cursor = db.cursor()
     item_id = get_int("Введите Id для удаления: ")
+    sql = f"SELECT * FROM {table} WHERE id = ?"
+    cursor.execute(sql, (item_id,))
+    row = cursor.fetchone()
+    if row is None:
+        print("Задача с таким ID не найдена!")
+        return
+    sql = f"DELETE FROM {table} WHERE id = ?"
+    cursor.execute(sql, (item_id,))
+    print(f"{section_name}, с названием {row['title']} была успешно удалена!")
+    db.commit()
     
-    for item in items:
-        if item_id == item.id:
-            print(f"{item.title} была успешно удалена!")
-            items.remove(item)
-            
-            save_function(items)
-            return
-    
-    print("по данному ID ничего не найдено!")
             
 def settings():
     while True:
@@ -113,102 +100,128 @@ def settings():
             return
 
 class TaskManager:
-    def __init__(self, tasks , save_function) -> None:
-        self.tasks = tasks
-        self.save_function = save_function
+    def __init__(self,) -> None:
         self.taskclass = Task
     
-    
     def create(self):
-        new_id = get_next_id(self.tasks)
+        cursor = db.cursor()
         print("Задача для создания")
         title = get_txt("Название: ")
         print("Описание для задачи!")
         text = get_txt("текст задачи: ")
         status = "в процессе"
         created_at = datetime.now().strftime("%Y-%m-%d %H:%M")
-        priority = "low"
-        everyday = False
+        priority = set_priority()
+        evereyday = False
         deadline = None
-        new_task = self.taskclass(new_id,title, text, status, created_at, priority, everyday, deadline)
-        set_priority(new_task)
-        self.tasks.append(new_task)
+        cursor.execute("INSERT INTO tasks (title,text,status,created_at,priority,evereyday,deadline) VALUES (?,?,?,?,?,?,?)" , (title,text,status,created_at,priority,evereyday,deadline))
         
+        new_id = cursor.lastrowid
+        cursor.execute("SELECT * FROM tasks WHERE id = ?", (new_id,))
+        row = cursor.fetchone()
         print(f"""
-                  Задача: {new_task.title} 
-                  С текстом: {new_task.text}
-                  Приоритет: {priority_visual(new_task)}
-                  была успешно добавлена!
-                  """)
-        self.save_function(self.tasks)
+              Задача:    {row["title"]}
+              С текстом: {row["text"]}
+              Приоритет: {priority_visual(row)}""")
+        db.commit()
         waitfornext()
         return
     
+   
+     
     def complete_task(self):
         task_id = get_int(
         "Введите ID задачи, которую хотите пометить выполненной: "
     )
-        for task in self.tasks:
-            if task_id == task.id:
-                task.status = "Выполнено"
-                self.save_function
 
-                print(
-                    f"Статус задачи «{task.title}» "
-                    f"успешно изменён на: {task.status}"
-                )
-                return
+        cursor = db.cursor()
 
-        print("Задача с таким ID не найдена!")
+        sql = """
+    UPDATE tasks
+    SET status = ?
+    WHERE id = ?
+    """
+        
+            
+        cursor.execute(sql, ("Выполнено", task_id))
+        if cursor.rowcount == 0:
+            print("Такой задачи не существует!")
+            return
+        db.commit()
 
+        print("Статус задачи успешно изменён!")
+        
     def logic_showall(self):
         choice = get_int("Ввод: ")
         if choice == 1:
-            show_all(self.tasks, "Задачи")
+            show_all("tasks", "Задач")
         elif choice == 2:
             self.show_by_status("в процессе")
         elif choice == 3:
             self.show_by_status("Выполнено")
 
     def show_by_status(self, section_status):
-        found = False
-        for task in self.tasks:
-            if task.status == section_status:
-                found = True
-                print(
-            f"ID: {task.id} | "
-            f"Название: {task.title} | "
-            f"Статус: {task.status}"
-            f"Приоритет: {priority_visual(task)}"
-        )
-        if not found:
+        cursor = db.cursor()
+        sql = "SELECT * FROM tasks WHERE status = ? "
+        cursor.execute(sql, (section_status,)) 
+        rows = cursor.fetchall()
+        if not rows:
             print("Нет таких задач")
-        
+        for row in rows:
+             print(
+            f"ID: {row['id']} | "
+            f"Название: {row['title']} | "
+            f"Статус: {row['status']}"
+            f"Приоритет: {priority_visual(row)}"
+        )
+          
     def remeber_deadline(self):
         today = datetime.now().strftime("%Y-%m-%d")
-        for task in self.tasks:
-            if task.deadline is None:
-                continue
-            if task.status == "Выполнено":
-                continue
-            if task.deadline < today:
-                print(f"у вас просроченая задача! {task.title}")
+        cursor = db.cursor()
+        sql = "SELECT * FROM tasks WHERE deadline IS NOT NULL AND status != ? AND deadline < ?"
+        cursor.execute(sql, ('Выполнено', today))
+        rows = cursor.fetchall()
+        for row in rows:
+            
+            if row['deadline'] < today:
+                print(f"у вас просроченая задача! {row['title']}")
 
     def add_deadline(self):
-        print("Введите ID задачи которой желаете добавить DEAD-LINE!")
+        print("Введите ID задачи, которой желаете добавить DEAD-LINE!")
         dead_id = get_int("Ввод: ")
-        found = False
-        for task in self.tasks:
-            if task.id == dead_id:
-                found = True
-                print("Введите дату дедлайна в формате yyyy-mm-dd")
-                new_deadline = get_txt("Ввод: ")
-                task.deadline = new_deadline
-                self.save_function(self.tasks)
-                print(f"Dead-line успешно установлен на {task.deadline}")
-                break
-        if not found:
-            print("Такой задачи не существует!")
+
+        cursor = db.cursor()
+
+        sql = """
+        SELECT *
+        FROM tasks
+        WHERE id = ?
+        """
+
+        cursor.execute(sql, (dead_id,))
+        row = cursor.fetchone()
+
+        if row is None:
+            print("Задача с таким ID не найдена!")
+            return
+
+        print("Введите дату дедлайна в формате yyyy-mm-dd")
+        new_deadline = get_txt("Ввод: ")
+
+        sql = """
+        UPDATE tasks
+        SET deadline = ?
+        WHERE id = ?
+        """
+
+        cursor.execute(sql, (new_deadline, dead_id))
+        db.commit()
+
+        print(
+           f"Dead-line для задачи «{row['title']}» "
+           f"успешно установлен на {new_deadline}"
+       )
+  
     def dead_line_logic(self):
         menu_dead_line()
         choice = get_int("Ввод: ")
@@ -221,9 +234,6 @@ class TaskManager:
         elif choice == 3:
             return
             
-                      
-
-
     def logic_p2(self):
         while True:
             menu_p2()
@@ -231,7 +241,7 @@ class TaskManager:
             if choice == 1:
                 self.create()
             elif choice == 2:
-                searcher(self.tasks, "Задача")
+                searcher("tasks", "Задача")
                 waitfornext()
             elif choice == 3:
                 menu_show_all()
@@ -241,7 +251,7 @@ class TaskManager:
                 self.complete_task()
                 waitfornext()
             elif choice == 5:
-                deleter(self.tasks, self.save_function)
+                deleter("tasks", "Задача")
                 waitfornext()
             elif choice == 6:
                 self.dead_line_logic()
@@ -252,28 +262,24 @@ class TaskManager:
 
 
 class NoteManager:
-    def __init__(self,notes, save_function) -> None:
-        self.notes = notes
-        self.save_function = save_function
+    def __init__(self) -> None:
         self.noteclass = Note
     
     def create(self):
-        new_id =get_next_id(self.notes)
+        cursor = db.cursor()
         print("Название заметки!")
         title = get_txt("Название: ")
         print("Текст Заметки!")
         text = get_txt("Введите: ")
-        priority = "low"
-        new_note = self.noteclass(new_id, title,text,priority)
-        set_priority(new_note)
-        self.notes.append(new_note)
-        print(f"""
-                  Заметка: {new_note.title} 
-                  С текстом: {new_note.text}
-                  Приоритет: {priority_visual(new_note)}
-                  была успешно добавлена!
-                  """)
-        self.save_function(self.notes)
+        priority = set_priority()
+        cursor.execute("INSERT INTO notes (title,text,priority) VALUES (?,?,?)" , (title,text,priority))
+        new_id = cursor.lastrowid
+        cursor.execute("SELECT * FROM notes WHERE id = ?" , (new_id,))
+        row = cursor.fetchone()
+        print(f"""Заметка:    {row["title"]}
+              С текстом: {row["text"]}
+              Приоритет: {priority_visual(row)}""")
+        db.commit()
         waitfornext()
         return
 
@@ -286,13 +292,13 @@ class NoteManager:
             if choice == 1:
                 self.create()
             elif choice == 2:
-                searcher(self.notes, "Заметки")
+                searcher("notes", "Заметки")
                 waitfornext()
             elif choice == 3:
-                show_all(self.notes, "Заметок")
+                show_all("notes", "Заметок")
                 waitfornext()
             elif choice == 4:
-                deleter(self.notes, self.save_function)
+                deleter("notes", "Заметка")
                 waitfornext()
             elif choice == 5:
                 return

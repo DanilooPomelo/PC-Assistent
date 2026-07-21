@@ -1,6 +1,40 @@
 import json
 from pathlib import Path
 from models import Task , Note
+import sqlite3
+db = sqlite3.connect("database.db")
+db.row_factory = sqlite3.Row
+
+def close_db():
+    db.commit()
+    db.close()
+    
+def init_db():
+    
+    cursor = db.cursor()
+    sql = """
+CREATE TABLE IF NOT EXISTS tasks (
+id INTEGER PRIMARY KEY,
+title TEXT,
+text TEXT,
+status TEXT,
+priority TEXT,
+created_at TEXT,
+evereyday TEXT,
+deadline TEXT
+);
+"""
+    cursor.execute(sql)
+    
+
+    sql = """CREATE TABLE IF NOT EXISTS notes (
+id INTEGER PRIMARY KEY,
+title TEXT,
+text TEXT,
+priority TEXT
+);"""
+    cursor.execute(sql)
+    db.commit()
 
 
 TASKS_FILE = Path(__file__).with_name("tasks.json")
