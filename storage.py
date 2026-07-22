@@ -21,10 +21,11 @@ status TEXT,
 priority TEXT,
 created_at TEXT,
 evereyday TEXT,
-deadline TEXT
+deadline TEXT,
+last_reminded TEXT
 );
 """
-    cursor.execute(sql)
+    cursor.execute(sql, )
     
 
     sql = """CREATE TABLE IF NOT EXISTS notes (
@@ -34,6 +35,8 @@ text TEXT,
 priority TEXT
 );"""
     cursor.execute(sql)
+
+    
     db.commit()
 
 

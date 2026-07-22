@@ -1,15 +1,16 @@
 from menus import main_menu
 from assistant import NoteManager, TaskManager,  settings
-from storage import save_notes, save_tasks ,load_notes, load_tasks
 from utils import get_int
 from storage import close_db, init_db
 
 
 
 
-note = NoteManager(load_notes(), save_notes)
-task = TaskManager(load_tasks(), save_tasks)
+note = NoteManager()
+task = TaskManager()
 init_db()
+task.remember_deadline()
+task.today_deadline()
 while True:
     main_menu()
     choice = get_int("Выберите пункт: ")
@@ -21,7 +22,5 @@ while True:
         settings()
     elif choice == 4:
         close_db()
-        save_notes(note.notes)
-        save_tasks(task.tasks)
         print("Все успешно сохранено, выход!")
         break

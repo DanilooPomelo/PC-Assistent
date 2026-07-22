@@ -1,7 +1,9 @@
+
+
 from models import Task, Note
 from menus import  menu_dead_line, menu_p1, menu_p2, menu_p3, menu_show_all
 from utils import get_int, get_txt, waitfornext
-from datetime import datetime
+from datetime import date, datetime
 from storage import db
 
 
@@ -85,8 +87,9 @@ def deleter(table, section_name):
         return
     sql = f"DELETE FROM {table} WHERE id = ?"
     cursor.execute(sql, (item_id,))
-    print(f"{section_name}, с названием {row['title']} была успешно удалена!")
     db.commit()
+    print(f"{section_name}, с названием {row['title']} была успешно удалена!")
+    
     
             
 def settings():
@@ -114,7 +117,8 @@ class TaskManager:
         priority = set_priority()
         evereyday = False
         deadline = None
-        cursor.execute("INSERT INTO tasks (title,text,status,created_at,priority,evereyday,deadline) VALUES (?,?,?,?,?,?,?)" , (title,text,status,created_at,priority,evereyday,deadline))
+        last_reminded = None
+        cursor.execute("INSERT INTO tasks (title,text,status,created_at,priority,evereyday,deadline,last_reminded) VALUES (?,?,?,?,?,?,?,?)" , (title,text,status,created_at,priority,evereyday,deadline,last_reminded))
         
         new_id = cursor.lastrowid
         cursor.execute("SELECT * FROM tasks WHERE id = ?", (new_id,))
@@ -171,20 +175,59 @@ class TaskManager:
              print(
             f"ID: {row['id']} | "
             f"Название: {row['title']} | "
-            f"Статус: {row['status']}"
+            f"Статус: {row['status']} |"
             f"Приоритет: {priority_visual(row)}"
         )
           
-    def remeber_deadline(self):
+    def today_deadline(self):
         today = datetime.now().strftime("%Y-%m-%d")
         cursor = db.cursor()
-        sql = "SELECT * FROM tasks WHERE deadline IS NOT NULL AND status != ? AND deadline < ?"
-        cursor.execute(sql, ('Выполнено', today))
-        rows = cursor.fetchall()
-        for row in rows:
+
+        sql = """
+    SELECT *
+    FROM tasks
+    WHERE deadline IS NOT NULL
+      AND status != ?
+      AND deadline = ?
+    """  
             
-            if row['deadline'] < today:
-                print(f"у вас просроченая задача! {row['title']}")
+        cursor.execute(sql, ("Выполнено", today))
+        rows = cursor.fetchall()
+
+        if not rows:
+            print("на сегодня список пуст!")
+            return
+
+        for row in rows:
+             print(
+            f"Сегодняшняя задача: {row['title']} | "
+            f"Дедлайн: {row['deadline']}"
+        )
+        
+    def remember_deadline(self):
+        today = datetime.now().strftime("%Y-%m-%d")
+        cursor = db.cursor()
+
+        sql = """
+    SELECT *
+    FROM tasks
+    WHERE deadline IS NOT NULL
+      AND status != ?
+      AND deadline < ?
+    """  
+            
+        cursor.execute(sql, ("Выполнено", today))
+        rows = cursor.fetchall()
+
+        if not rows:
+            print("Просроченных задач нет!")
+            return
+
+        for row in rows:
+             print(
+            f"Просроченная задача: {row['title']} | "
+            f"Дедлайн: {row['deadline']}"
+        )
 
     def add_deadline(self):
         print("Введите ID задачи, которой желаете добавить DEAD-LINE!")
@@ -204,23 +247,34 @@ class TaskManager:
         if row is None:
             print("Задача с таким ID не найдена!")
             return
-
-        print("Введите дату дедлайна в формате yyyy-mm-dd")
-        new_deadline = get_txt("Ввод: ")
-
+        
         sql = """
         UPDATE tasks
         SET deadline = ?
         WHERE id = ?
         """
+        
 
-        cursor.execute(sql, (new_deadline, dead_id))
-        db.commit()
-
-        print(
+        try:
+            print("Введите дату дедлайна в формате yyyy-mm-dd")
+            new_deadline = get_txt("Ввод: ")
+            new_deadline = new_deadline.replace("." , "-")
+            new_deadline = new_deadline.replace("/" , "-")
+            new_deadline = new_deadline.replace(" " , "-")
+            deadline = datetime.strptime(new_deadline , "%Y-%m-%d")
+            new_deadline = deadline.strftime( "%Y-%m-%d")
+            print(
            f"Dead-line для задачи «{row['title']}» "
-           f"успешно установлен на {new_deadline}"
-       )
+           f"успешно установлен на {new_deadline}")
+            cursor.execute(sql, (new_deadline, dead_id))
+            db.commit()
+        except ValueError:
+            print("Введите корректную дату! YYYY-MM-DD")
+
+        
+
+        
+        
   
     def dead_line_logic(self):
         menu_dead_line()
@@ -229,7 +283,7 @@ class TaskManager:
             self.add_deadline()
             waitfornext()
         elif choice == 2:
-            self.remeber_deadline()
+            self.remember_deadline()
             waitfornext()
         elif choice == 3:
             return
