@@ -1,16 +1,24 @@
-
+from random import choice
 
 from models import Task, Note
-from menus import  menu_dead_line, menu_p1, menu_p2, menu_p3, menu_show_all
+from menus import  menu_dead_line, menu_p1, menu_p2, menu_p3, menu_show_all, task_editor
 from utils import get_int, get_txt, waitfornext
 from datetime import date, datetime
 from storage import db
+from rich.console import Console
+from rich.table import Table
+from rich.prompt import Prompt
 
 
 
 
-
+console = Console()
 def searcher(table, section_name):
+    tables = Table(title=f"Результаты поиска: {section_name}")
+    tables.add_column("id", style="bold")
+    tables.add_column("title", style="bold underline green")
+    tables.add_column("priority")
+
     cursor = db.cursor()
     sql = f"SELECT * FROM {table}"
     words = get_txt("Название для поиска: ").lower()
@@ -22,15 +30,12 @@ def searcher(table, section_name):
         
         if words in row['title'].lower() or words in row['text'].lower():
             found = True
-            print(f"Нашел {section_name}"
-                  f"С ID: {row['id']}"
-                  f"Название: {row['title']}"
-                  f"Приоритет: {priority_visual(row)}")
-    if not found:
-        print("По вашему запросу ничего не найдено!")
-        
-       
-
+            tables.add_row(str(row['id']),row['title'],priority_visual(row))
+    if found:
+            console.print(tables)
+    else:
+            print("По вашему запросу ничего не найдено!")
+           
 def set_priority():
     while True:
         print("""
@@ -61,22 +66,46 @@ def priority_visual(item):
 
     return priority_icons.get(item['priority'], "\u26AA")
 
-
 def show_all(table, section_name):
+    tables = Table(title=f"Все — {section_name}")
+    tables.add_column("id", style="bold")
+    tables.add_column("title", style="bold underline green")
+    tables.add_column("priority")
+
     cursor = db.cursor()
     sql = f"SELECT * FROM {table}"
     cursor.execute(sql)
     rows = cursor.fetchall()
+
     if not rows:
-        print(f"Список {section_name} пуст!")
+        console.print(f"Список {section_name} пуст!")
+        return
+
+    has_status = "status" in rows[0].keys()
+
+    if has_status:
+        tables.add_column("status")
+
     for row in rows:
-        print(f"ID: {row['id']} | "
-            f"Название: {row['title']} | "
-            f"Приоритет: {priority_visual(row)}")
-        if "status" in row.keys():
-            print(f"Статус: {row['status']}")
+        if has_status:
+            tables.add_row(
+                str(row["id"]),
+                row["title"],
+                priority_visual(row),
+                row["status"]
+            )
+        else:
+            tables.add_row(
+                str(row["id"]),
+                row["title"],
+                priority_visual(row)
+            )
+
+    console.print(tables)
+        
 
 def deleter(table, section_name):
+
     cursor = db.cursor()
     item_id = get_int("Введите Id для удаления: ")
     sql = f"SELECT * FROM {table} WHERE id = ?"
@@ -89,9 +118,7 @@ def deleter(table, section_name):
     cursor.execute(sql, (item_id,))
     db.commit()
     print(f"{section_name}, с названием {row['title']} была успешно удалена!")
-    
-    
-            
+           
 def settings():
     while True:
         menu_p3()
@@ -103,19 +130,106 @@ def settings():
             return
 
 class TaskManager:
+   
+
+
     def __init__(self,) -> None:
         self.taskclass = Task
+
+
+    def db_updater(self, section_name, new_value,task_id):
+        cursor = db.cursor()
+        sql = f"UPDATE tasks SET {section_name} = ? WHERE id =?"
+        cursor.execute(sql, (new_value, task_id))
+        db.commit()
+
+    def title_editor(self, row):
+        new_title = Prompt.ask("New title", default=row['title'])
+        self.db_updater("title" , new_title, row['id'])
+
+    def text_editor(self, row):
+        new_text = Prompt.ask("New Text", default=row['text'])
+        self.db_updater("text", new_text, row['id'])
+    def priority_editor(self,row):
+        new_priority = set_priority()
+        self.db_updater("priority", new_priority, row['id'])
+    def deadline_editor(self, row):
+        new_deadline = Prompt.ask("New Deadline", default=row['deadline'])
+        self.db_updater("deadline", new_deadline,row['id'])
+    def everyday_editor(self, row):
+        print("Ежедневная задача? 1 -- да   2 -- нет")
+        choice = get_int("Ввод: ")
+        if choice ==1:
+            evereyday = True
+        elif choice ==2:
+            evereyday = False
+        else:
+            print("неверный выбор!")
+            return
+        
+        self.db_updater("evereyday", evereyday, row['id'])
+    def logic_editor(self):
+        cursor = db.cursor()
+        sql = "SELECT * FROM tasks WHERE id = ?"
+        id = get_int("Enter ID:  ")
+        cursor.execute(sql, (id,))
+        row = cursor.fetchone()
+        task_editor()
+        choice = get_int("Выберите: ")
+        if choice == 1:
+            self.title_editor(row)
+        elif choice == 2:
+            self.text_editor(row)
+        elif choice == 3:
+            self.priority_editor(row)
+        elif choice == 4:
+            self.deadline_editor(row)
+        elif choice == 5:
+            self.everyday_editor(row)
+        elif choice == 6:
+            return
+
+
+
+    def reminder(self):
+        today = datetime.now().strftime("%Y-%m-%d")
+        cursor = db.cursor()
+        sql = "SELECT * FROM tasks WHERE evereyday = 1 AND (last_reminded IS NULL OR last_reminded != ?)"
+        cursor.execute(sql, (today,))
+        rows = cursor.fetchall()
+        for row in rows:
+            print("у вас невыполненое ежидневное задание!")
+            print(row['title'])
+            
+
+
+        sql = "UPDATE tasks SET last_reminded = ? WHERE evereyday = 1 AND (last_reminded IS NULL OR last_reminded != ?)"
+        
+        cursor.execute(sql, (today, today))
+        db.commit()
     
     def create(self):
+        table = Table()
+        table.add_column("id", style="bold")
+        table.add_column("title", style="bold underline green")
+        table.add_column("priority")
+        table.add_column("status" ,style="bold red underline yellow")
         cursor = db.cursor()
         print("Задача для создания")
         title = get_txt("Название: ")
         print("Описание для задачи!")
         text = get_txt("текст задачи: ")
+        print("Ежедневная задача? 1 -- да   2 -- нет")
+        choice = get_int("Ввод: ")
+        if choice ==1:
+            evereyday = True
+        elif choice ==2:
+            evereyday = False
+        else:
+            print("неверный выбор!")
         status = "в процессе"
         created_at = datetime.now().strftime("%Y-%m-%d %H:%M")
         priority = set_priority()
-        evereyday = False
         deadline = None
         last_reminded = None
         cursor.execute("INSERT INTO tasks (title,text,status,created_at,priority,evereyday,deadline,last_reminded) VALUES (?,?,?,?,?,?,?,?)" , (title,text,status,created_at,priority,evereyday,deadline,last_reminded))
@@ -123,16 +237,12 @@ class TaskManager:
         new_id = cursor.lastrowid
         cursor.execute("SELECT * FROM tasks WHERE id = ?", (new_id,))
         row = cursor.fetchone()
-        print(f"""
-              Задача:    {row["title"]}
-              С текстом: {row["text"]}
-              Приоритет: {priority_visual(row)}""")
+        table.add_row(str(row['id']),row['title'] , priority_visual(row), row['status'])
+        console.print(table)
         db.commit()
         waitfornext()
         return
     
-   
-     
     def complete_task(self):
         task_id = get_int(
         "Введите ID задачи, которую хотите пометить выполненной: "
@@ -271,11 +381,6 @@ class TaskManager:
         except ValueError:
             print("Введите корректную дату! YYYY-MM-DD")
 
-        
-
-        
-        
-  
     def dead_line_logic(self):
         menu_dead_line()
         choice = get_int("Ввод: ")
@@ -309,11 +414,13 @@ class TaskManager:
                 waitfornext()
             elif choice == 6:
                 self.dead_line_logic()
+            
             elif choice == 7:
+                self.logic_editor()
+            elif choice == 8:
                 return
             else:
                 print("неверный ввод!")
-
 
 class NoteManager:
     def __init__(self) -> None:
@@ -336,8 +443,6 @@ class NoteManager:
         db.commit()
         waitfornext()
         return
-
-
 
     def logic_p1(self):
         while True:

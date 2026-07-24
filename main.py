@@ -3,12 +3,10 @@ from assistant import NoteManager, TaskManager,  settings
 from utils import get_int
 from storage import close_db, init_db
 
-
-
-
 note = NoteManager()
 task = TaskManager()
 init_db()
+task.reminder()
 task.remember_deadline()
 task.today_deadline()
 while True:
