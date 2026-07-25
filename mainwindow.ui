@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>796</width>
-    <height>487</height>
+    <width>757</width>
+    <height>628</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QFrame" name="sidebat_frame">
+     <widget class="QFrame" name="LEFTworkspace">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -43,51 +43,238 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QPushButton" name="tasks_button">
-         <property name="text">
-          <string>Tasks</string>
+        <widget class="QStackedWidget" name="main_logick_stackpages">
+         <property name="currentIndex">
+          <number>0</number>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="note_button">
-         <property name="text">
-          <string>Notes</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="settings_button">
-         <property name="text">
-          <string>Settings</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>187</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="exit_button">
-         <property name="text">
-          <string>Exit</string>
-         </property>
+         <widget class="QWidget" name="main_menu_page">
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QPushButton" name="tasks_button">
+               <property name="text">
+                <string>Tasks</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="note_button">
+               <property name="text">
+                <string>Notes</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="settings_button">
+               <property name="text">
+                <string>Settings</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Orientation::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>187</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="exit_button">
+               <property name="text">
+                <string>Exit</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="main_tasks_menu_page">
+          <layout class="QVBoxLayout" name="verticalLayout_8">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <widget class="QPushButton" name="menu_btn_create_task">
+               <property name="text">
+                <string>Create Task</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="menu_btn_search_task">
+               <property name="text">
+                <string>Serach Task</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="menu_btn_show_all_tasks">
+               <property name="text">
+                <string>Show All Tasks</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="menu_btn_complete_tasks">
+               <property name="text">
+                <string>Complete Task</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="menu_btn_delete_tasks">
+               <property name="text">
+                <string>Delete Task</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="menu_btn_deadline_tasks">
+               <property name="text">
+                <string>Deadlines</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="menu_btn_editor_tasks">
+               <property name="text">
+                <string>Task Editor</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Orientation::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="menu_btn_back_tasks">
+               <property name="text">
+                <string>Back</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="main_show_all_tasks_btn_page">
+          <layout class="QVBoxLayout" name="verticalLayout_14">
+           <item>
+            <widget class="QPushButton" name="btn_show_all_tasks">
+             <property name="text">
+              <string>Show all tasks</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_show_completed_tasks">
+             <property name="text">
+              <string>Show Completed</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_show_in_process_tasks">
+             <property name="text">
+              <string>Show in process</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="back_from_show_all_task_page">
+             <property name="text">
+              <string>Back</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="main_notes_menu_page">
+          <layout class="QVBoxLayout" name="verticalLayout_11">
+           <item>
+            <widget class="QPushButton" name="menu_btn_create_note">
+             <property name="text">
+              <string>Create Note</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="menu_btn_search_note">
+             <property name="text">
+              <string>Serch Notes</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="menu_btn_show_all_notes">
+             <property name="text">
+              <string>Show All Notes</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="menu_btn_delete_note">
+             <property name="text">
+              <string>Dealete Note</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Orientation::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="menu_btn_back_note">
+             <property name="text">
+              <string>Back</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="main_settings_menu_page">
+          <layout class="QVBoxLayout" name="verticalLayout_12">
+           <item>
+            <widget class="QPushButton" name="menu_btn_back_settings">
+             <property name="text">
+              <string>Back</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>
      </widget>
     </item>
     <item>
-     <widget class="QFrame" name="content_frame">
+     <widget class="QFrame" name="RIGHTWORKSPACE">
       <property name="frameShape">
        <enum>QFrame::Shape::StyledPanel</enum>
       </property>
@@ -97,132 +284,180 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QStackedWidget" name="pages_stack">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="currentIndex">
           <number>2</number>
          </property>
          <widget class="QWidget" name="notes_page">
-          <widget class="QLabel" name="note_title_label">
-           <property name="geometry">
-            <rect>
-             <x>470</x>
-             <y>20</y>
-             <width>49</width>
-             <height>16</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>notes</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="verticalLayout_9">
+           <item>
+            <widget class="QLabel" name="note_title_label">
+             <property name="text">
+              <string>notes</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
          <widget class="QWidget" name="settings_page">
-          <widget class="QLabel" name="settings_title_label">
-           <property name="geometry">
-            <rect>
-             <x>340</x>
-             <y>270</y>
-             <width>49</width>
-             <height>16</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>settings</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <widget class="QLabel" name="settings_title_label">
+             <property name="text">
+              <string>settings</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="WELCOME_PAGE"/>
+         <widget class="QWidget" name="complete_tasks_page">
+          <layout class="QVBoxLayout" name="verticalLayout_16">
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Task ID FOR COMPLETE</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="get_id_for_complete_task"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_push_for_complet_task">
+             <property name="text">
+              <string>Complete Task</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTableView" name="table_fo_result_complete_task"/>
+           </item>
+          </layout>
          </widget>
          <widget class="QWidget" name="tasks_page">
-          <widget class="QLabel" name="tasks_title_label">
-           <property name="geometry">
-            <rect>
-             <x>260</x>
-             <y>0</y>
-             <width>49</width>
-             <height>16</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>tasks</string>
-           </property>
-          </widget>
-          <widget class="QWidget" name="">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>258</width>
-             <height>376</height>
-            </rect>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_3">
-            <item>
-             <widget class="QLabel" name="task_title_label">
-              <property name="text">
-               <string>Enter Task Title</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="task_title"/>
-            </item>
-            <item>
-             <widget class="QLabel" name="task_text_label">
-              <property name="text">
-               <string>Enter Text for task</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QTextEdit" name="task_text"/>
-            </item>
-            <item>
-             <widget class="QLabel" name="task_priority_label">
-              <property name="text">
-               <string>choose priority</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="priority_box">
-              <item>
+          <layout class="QVBoxLayout" name="verticalLayout_7">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QLabel" name="task_title_label">
                <property name="text">
-                <string>🟢 - Low Priority</string>
+                <string>Enter Task Title</string>
                </property>
-              </item>
-              <item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="task_title"/>
+             </item>
+             <item>
+              <widget class="QLabel" name="task_text_label">
                <property name="text">
-                <string>🟡 - Medium Priority</string>
+                <string>Enter Text for task</string>
                </property>
-              </item>
-              <item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QTextEdit" name="task_text"/>
+             </item>
+             <item>
+              <widget class="QLabel" name="task_priority_label">
                <property name="text">
-                <string>🔴 - High priority</string>
+                <string>choose priority</string>
                </property>
-              </item>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="everyday_task_label">
-              <property name="text">
-               <string>everyday Task?</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="everyday_box">
-              <property name="text">
-               <string>Everyday</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="create_task_btn">
-              <property name="text">
-               <string>Create</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="priority_box">
+               <item>
+                <property name="text">
+                 <string>🟢 - Low Priority</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>🟡 - Medium Priority</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>🔴 - High priority</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="everyday_task_label">
+               <property name="text">
+                <string>everyday Task?</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="everyday_box">
+               <property name="text">
+                <string>Everyday</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="create_task_btn">
+               <property name="text">
+                <string>Create</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="search_tasks_page">
+          <layout class="QVBoxLayout" name="verticalLayout_13">
+           <item>
+            <widget class="QLabel" name="label_for_task_serch_page">
+             <property name="maximumSize">
+              <size>
+               <width>300</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Enter Title or text</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="tasks_sercher_text"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="task_btn_for_search">
+             <property name="text">
+              <string>Search</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTableView" name="table_result_task_serach"/>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="show_all_tasks_page">
+          <layout class="QVBoxLayout" name="verticalLayout_15">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Show ALL Menu</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTableView" name="show_all_tasks_table"/>
+           </item>
+          </layout>
          </widget>
         </widget>
        </item>
@@ -236,7 +471,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>796</width>
+     <width>757</width>
      <height>33</height>
     </rect>
    </property>

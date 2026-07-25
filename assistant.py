@@ -12,6 +12,7 @@ from rich.prompt import Prompt
 
 
 
+
 console = Console()
 def searcher(table, section_name):
     tables = Table(title=f"Результаты поиска: {section_name}")
@@ -211,28 +212,15 @@ class TaskManager:
         cursor.execute(sql, (today, today))
         db.commit()
     
-    def create(self):
+    def create(self , title, text, priority, evereyday):
         table = Table()
         table.add_column("id", style="bold")
         table.add_column("title", style="bold underline green")
         table.add_column("priority")
         table.add_column("status" ,style="bold red underline yellow")
         cursor = db.cursor()
-        print("Задача для создания")
-        title = get_txt("Название: ")
-        print("Описание для задачи!")
-        text = get_txt("текст задачи: ")
-        print("Ежедневная задача? 1 -- да   2 -- нет")
-        choice = get_int("Ввод: ")
-        if choice ==1:
-            evereyday = True
-        elif choice ==2:
-            evereyday = False
-        else:
-            print("неверный выбор!")
         status = "в процессе"
         created_at = datetime.now().strftime("%Y-%m-%d %H:%M")
-        priority = set_priority()
         deadline = None
         last_reminded = None
         cursor.execute("INSERT INTO tasks (title,text,status,created_at,priority,evereyday,deadline,last_reminded) VALUES (?,?,?,?,?,?,?,?)" , (title,text,status,created_at,priority,evereyday,deadline,last_reminded))
@@ -243,7 +231,6 @@ class TaskManager:
         table.add_row(str(row['id']),row['title'] , priority_visual(row), row['status'])
         console.print(table)
         db.commit()
-        waitfornext()
         return
     
     def complete_task(self):
