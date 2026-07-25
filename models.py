@@ -48,12 +48,12 @@ class Note:
         "priority": self.priority,
     }
     @classmethod
-    def from_dict(cls,task):
+    def from_dict(cls,note):
         return cls(
-            task["id"],
-            task["title"],
-            task["text"],
-            task["priority"]
+            note["id"],
+            note["title"],
+            note["text"],
+            note["priority"]
     )
         
     

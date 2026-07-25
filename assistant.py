@@ -174,6 +174,9 @@ class TaskManager:
         id = get_int("Enter ID:  ")
         cursor.execute(sql, (id,))
         row = cursor.fetchone()
+        if row is None:
+            print("не найдено!")
+            return
         task_editor()
         choice = get_int("Выберите: ")
         if choice == 1:

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>main_window</class>
+ <widget class="QMainWindow" name="main_window">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>796</width>
+    <height>487</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>PC Assistant</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QFrame" name="sidebat_frame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>200</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QPushButton" name="tasks_button">
+         <property name="text">
+          <string>Tasks</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="note_button">
+         <property name="text">
+          <string>Notes</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="settings_button">
+         <property name="text">
+          <string>Settings</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>187</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="exit_button">
+         <property name="text">
+          <string>Exit</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="content_frame">
+      <property name="frameShape">
+       <enum>QFrame::Shape::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Shadow::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QStackedWidget" name="pages_stack">
+         <property name="currentIndex">
+          <number>2</number>
+         </property>
+         <widget class="QWidget" name="notes_page">
+          <widget class="QLabel" name="note_title_label">
+           <property name="geometry">
+            <rect>
+             <x>470</x>
+             <y>20</y>
+             <width>49</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>notes</string>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="settings_page">
+          <widget class="QLabel" name="settings_title_label">
+           <property name="geometry">
+            <rect>
+             <x>340</x>
+             <y>270</y>
+             <width>49</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>settings</string>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="tasks_page">
+          <widget class="QLabel" name="tasks_title_label">
+           <property name="geometry">
+            <rect>
+             <x>260</x>
+             <y>0</y>
+             <width>49</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>tasks</string>
+           </property>
+          </widget>
+          <widget class="QWidget" name="">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>258</width>
+             <height>376</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QLabel" name="task_title_label">
+              <property name="text">
+               <string>Enter Task Title</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="task_title"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="task_text_label">
+              <property name="text">
+               <string>Enter Text for task</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QTextEdit" name="task_text"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="task_priority_label">
+              <property name="text">
+               <string>choose priority</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="priority_box">
+              <item>
+               <property name="text">
+                <string>🟢 - Low Priority</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>🟡 - Medium Priority</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>🔴 - High priority</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="everyday_task_label">
+              <property name="text">
+               <string>everyday Task?</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="everyday_box">
+              <property name="text">
+               <string>Everyday</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="create_task_btn">
+              <property name="text">
+               <string>Create</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>796</width>
+     <height>33</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
