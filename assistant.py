@@ -14,28 +14,14 @@ from rich.prompt import Prompt
 
 
 console = Console()
-def searcher(table, section_name):
-    tables = Table(title=f"Результаты поиска: {section_name}")
-    tables.add_column("id", style="bold")
-    tables.add_column("title", style="bold underline green")
-    tables.add_column("priority")
-
+def searcher(table, searcher_text):
     cursor = db.cursor()
-    sql = f"SELECT * FROM {table}"
-    words = get_txt("Название для поиска: ").lower()
-    cursor.execute(sql)
+    sql = f"SELECT * FROM {table} WHERE LOWER(title) LIKE ? OR LOWER(text) LIKE ?"
+    search_value = f"%{searcher_text.lower()}%"
+    cursor.execute(sql, (search_value, search_value))
     rows = cursor.fetchall()
     
-    found = False
-    for row in rows:
-        
-        if words in row['title'].lower() or words in row['text'].lower():
-            found = True
-            tables.add_row(str(row['id']),row['title'],priority_visual(row))
-    if found:
-            console.print(tables)
-    else:
-            print("По вашему запросу ничего не найдено!")
+    return rows
            
 def set_priority():
     while True:
@@ -66,7 +52,14 @@ def priority_visual(item):
     }
 
     return priority_icons.get(item['priority'], "\u26AA")
-
+def gui_show_all(table): #ready for GUI
+    cursor = db.cursor()
+    sql = f"SELECT * FROM {table}"
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    
+    return rows
+   
 def show_all(table, section_name):
     tables = Table(title=f"Все — {section_name}")
     tables.add_column("id", style="bold")
@@ -105,20 +98,17 @@ def show_all(table, section_name):
     console.print(tables)
         
 
-def deleter(table, section_name):
-
+def deleter(table, task_id):
     cursor = db.cursor()
-    item_id = get_int("Введите Id для удаления: ")
     sql = f"SELECT * FROM {table} WHERE id = ?"
-    cursor.execute(sql, (item_id,))
+    cursor.execute(sql, (task_id,))
     row = cursor.fetchone()
-    if row is None:
-        print("Задача с таким ID не найдена!")
-        return
+    
     sql = f"DELETE FROM {table} WHERE id = ?"
-    cursor.execute(sql, (item_id,))
+    cursor.execute(sql, (task_id,))
     db.commit()
-    print(f"{section_name}, с названием {row['title']} была успешно удалена!")
+    return row
+    
            
 def settings():
     while True:
@@ -231,13 +221,9 @@ class TaskManager:
         table.add_row(str(row['id']),row['title'] , priority_visual(row), row['status'])
         console.print(table)
         db.commit()
-        return
+        return row
     
-    def complete_task(self):
-        task_id = get_int(
-        "Введите ID задачи, которую хотите пометить выполненной: "
-    )
-
+    def complete_task(self, task_id):
         cursor = db.cursor()
 
         sql = """
@@ -248,12 +234,14 @@ class TaskManager:
         
             
         cursor.execute(sql, ("Выполнено", task_id))
-        if cursor.rowcount == 0:
-            print("Такой задачи не существует!")
-            return
+        
         db.commit()
-
-        print("Статус задачи успешно изменён!")
+        cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
+        row = cursor.fetchone()
+        return row
+        
+        
+        
         
     def logic_showall(self):
         choice = get_int("Ввод: ")
@@ -264,20 +252,12 @@ class TaskManager:
         elif choice == 3:
             self.show_by_status("Выполнено")
 
-    def show_by_status(self, section_status):
+    def show_by_status(self, section_status): # ready for gui
         cursor = db.cursor()
         sql = "SELECT * FROM tasks WHERE status = ? "
         cursor.execute(sql, (section_status,)) 
         rows = cursor.fetchall()
-        if not rows:
-            print("Нет таких задач")
-        for row in rows:
-             print(
-            f"ID: {row['id']} | "
-            f"Название: {row['title']} | "
-            f"Статус: {row['status']} |"
-            f"Приоритет: {priority_visual(row)}"
-        )
+        return rows
           
     def today_deadline(self):
         today = datetime.now().strftime("%Y-%m-%d")

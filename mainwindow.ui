@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>757</width>
-    <height>628</height>
+    <width>846</width>
+    <height>555</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -340,6 +340,30 @@
            </item>
           </layout>
          </widget>
+         <widget class="QWidget" name="task_deleter_page">
+          <layout class="QVBoxLayout" name="verticalLayout_17">
+           <item>
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>TASK ID FOR DELETE</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="get_task_id_for_delite"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="delete_task_btn">
+             <property name="text">
+              <string>Delete Task</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QTableView" name="show_delite_task_table"/>
+           </item>
+          </layout>
+         </widget>
          <widget class="QWidget" name="tasks_page">
           <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
@@ -411,6 +435,16 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QTableView" name="table_for_create_task">
+               <property name="maximumSize">
+                <size>
+                 <width>167777</width>
+                 <height>80</height>
+                </size>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
           </layout>
@@ -471,7 +505,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>757</width>
+     <width>846</width>
      <height>33</height>
     </rect>
    </property>
