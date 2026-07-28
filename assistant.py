@@ -1,5 +1,3 @@
-from random import choice
-
 from models import Task, Note
 from menus import  menu_dead_line, menu_p1, menu_p2, menu_p3, menu_show_all, task_editor
 from utils import get_int, get_txt, waitfornext
@@ -16,12 +14,23 @@ from rich.prompt import Prompt
 console = Console()
 def searcher(table, searcher_text):
     cursor = db.cursor()
-    sql = f"SELECT * FROM {table} WHERE LOWER(title) LIKE ? OR LOWER(text) LIKE ?"
-    search_value = f"%{searcher_text.lower()}%"
-    cursor.execute(sql, (search_value, search_value))
+
+    sql = f"SELECT * FROM {table}"
+    cursor.execute(sql)
+
     rows = cursor.fetchall()
-    
-    return rows
+    search_value = searcher_text.strip().casefold()
+
+    found_rows = []
+
+    for row in rows:
+        title = str(row["title"] or "").casefold()
+        text = str(row["text"] or "").casefold()
+
+        if search_value in title or search_value in text:
+            found_rows.append(row)
+
+    return found_rows
            
 def set_priority():
     while True:
@@ -60,42 +69,6 @@ def gui_show_all(table): #ready for GUI
     
     return rows
    
-def show_all(table, section_name):
-    tables = Table(title=f"Все — {section_name}")
-    tables.add_column("id", style="bold")
-    tables.add_column("title", style="bold underline green")
-    tables.add_column("priority")
-
-    cursor = db.cursor()
-    sql = f"SELECT * FROM {table}"
-    cursor.execute(sql)
-    rows = cursor.fetchall()
-
-    if not rows:
-        console.print(f"Список {section_name} пуст!")
-        return
-
-    has_status = "status" in rows[0].keys()
-
-    if has_status:
-        tables.add_column("status")
-
-    for row in rows:
-        if has_status:
-            tables.add_row(
-                str(row["id"]),
-                row["title"],
-                priority_visual(row),
-                row["status"]
-            )
-        else:
-            tables.add_row(
-                str(row["id"]),
-                row["title"],
-                priority_visual(row)
-            )
-
-    console.print(tables)
         
 
 def deleter(table, task_id):
@@ -103,7 +76,8 @@ def deleter(table, task_id):
     sql = f"SELECT * FROM {table} WHERE id = ?"
     cursor.execute(sql, (task_id,))
     row = cursor.fetchone()
-    
+    if row is None:
+        return None
     sql = f"DELETE FROM {table} WHERE id = ?"
     cursor.execute(sql, (task_id,))
     db.commit()
@@ -203,11 +177,7 @@ class TaskManager:
         db.commit()
     
     def create(self , title, text, priority, evereyday):
-        table = Table()
-        table.add_column("id", style="bold")
-        table.add_column("title", style="bold underline green")
-        table.add_column("priority")
-        table.add_column("status" ,style="bold red underline yellow")
+       
         cursor = db.cursor()
         status = "в процессе"
         created_at = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -218,8 +188,6 @@ class TaskManager:
         new_id = cursor.lastrowid
         cursor.execute("SELECT * FROM tasks WHERE id = ?", (new_id,))
         row = cursor.fetchone()
-        table.add_row(str(row['id']),row['title'] , priority_visual(row), row['status'])
-        console.print(table)
         db.commit()
         return row
     
@@ -243,14 +211,7 @@ class TaskManager:
         
         
         
-    def logic_showall(self):
-        choice = get_int("Ввод: ")
-        if choice == 1:
-            show_all("tasks", "Задач")
-        elif choice == 2:
-            self.show_by_status("в процессе")
-        elif choice == 3:
-            self.show_by_status("Выполнено")
+    
 
     def show_by_status(self, section_status): # ready for gui
         cursor = db.cursor()
@@ -300,18 +261,13 @@ class TaskManager:
         rows = cursor.fetchall()
 
         if not rows:
-            print("Просроченных задач нет!")
-            return
+            return rows
 
-        for row in rows:
-             print(
-            f"Просроченная задача: {row['title']} | "
-            f"Дедлайн: {row['deadline']}"
-        )
+        return rows
+        
 
-    def add_deadline(self):
-        print("Введите ID задачи, которой желаете добавить DEAD-LINE!")
-        dead_id = get_int("Ввод: ")
+    def add_deadline(self, new_deadline, task_id):
+        
 
         cursor = db.cursor()
 
@@ -321,115 +277,60 @@ class TaskManager:
         WHERE id = ?
         """
 
-        cursor.execute(sql, (dead_id,))
+        cursor.execute(sql, (task_id,))
         row = cursor.fetchone()
-
         if row is None:
-            print("Задача с таким ID не найдена!")
-            return
+            return None
         
-        sql = """
-        UPDATE tasks
-        SET deadline = ?
-        WHERE id = ?
-        """
+        
         
 
         try:
-            print("Введите дату дедлайна в формате yyyy-mm-dd")
-            new_deadline = get_txt("Ввод: ")
+            
             new_deadline = new_deadline.replace("." , "-")
             new_deadline = new_deadline.replace("/" , "-")
             new_deadline = new_deadline.replace(" " , "-")
             deadline = datetime.strptime(new_deadline , "%Y-%m-%d")
             new_deadline = deadline.strftime( "%Y-%m-%d")
-            print(
-           f"Dead-line для задачи «{row['title']}» "
-           f"успешно установлен на {new_deadline}")
-            cursor.execute(sql, (new_deadline, dead_id))
+            cursor.execute(
+            """
+            UPDATE tasks
+            SET deadline = ?
+            WHERE id = ?
+            """,
+            (new_deadline, task_id)
+          )
+
             db.commit()
+
+            cursor.execute(
+            "SELECT * FROM tasks WHERE id = ?",
+            (task_id,)
+          )
+
+            return cursor.fetchone()
+            
+
+
         except ValueError:
             print("Введите корректную дату! YYYY-MM-DD")
+            return None
+        
 
-    def dead_line_logic(self):
-        menu_dead_line()
-        choice = get_int("Ввод: ")
-        if choice == 1:
-            self.add_deadline()
-            waitfornext()
-        elif choice == 2:
-            self.remember_deadline()
-            waitfornext()
-        elif choice == 3:
-            return
+    
             
-    def logic_p2(self):
-        while True:
-            menu_p2()
-            choice = get_int("Выберите пункт: ")
-            if choice == 1:
-                self.create()
-            elif choice == 2:
-                searcher("tasks", "Задача")
-                waitfornext()
-            elif choice == 3:
-                menu_show_all()
-                self.logic_showall()
-                waitfornext()
-            elif choice == 4:
-                self.complete_task()
-                waitfornext()
-            elif choice == 5:
-                deleter("tasks", "Задача")
-                waitfornext()
-            elif choice == 6:
-                self.dead_line_logic()
-            
-            elif choice == 7:
-                self.logic_editor()
-            elif choice == 8:
-                return
-            else:
-                print("неверный ввод!")
+    
 
 class NoteManager:
     def __init__(self) -> None:
         self.noteclass = Note
     
-    def create(self):
+    def create(self, title,text, priority):
         cursor = db.cursor()
-        print("Название заметки!")
-        title = get_txt("Название: ")
-        print("Текст Заметки!")
-        text = get_txt("Введите: ")
-        priority = set_priority()
         cursor.execute("INSERT INTO notes (title,text,priority) VALUES (?,?,?)" , (title,text,priority))
         new_id = cursor.lastrowid
         cursor.execute("SELECT * FROM notes WHERE id = ?" , (new_id,))
         row = cursor.fetchone()
-        print(f"""Заметка:    {row["title"]}
-              С текстом: {row["text"]}
-              Приоритет: {priority_visual(row)}""")
         db.commit()
-        waitfornext()
-        return
 
-    def logic_p1(self):
-        while True:
-            menu_p1()
-            choice = get_int("Выберите пункт: ")
-            if choice == 1:
-                self.create()
-            elif choice == 2:
-                searcher("notes", "Заметки")
-                waitfornext()
-            elif choice == 3:
-                show_all("notes", "Заметок")
-                waitfornext()
-            elif choice == 4:
-                deleter("notes", "Заметка")
-                waitfornext()
-            elif choice == 5:
-                return
-            else:
-                print("Неверный выбор!")
+        return row
